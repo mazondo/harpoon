@@ -4,4 +4,5 @@ module Harpoon
 
 	# Services
 	require_relative "harpoon/services/test_hosting.rb"
+	require_relative "harpoon/services/aws_hosting.rb"
 end
