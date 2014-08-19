@@ -1,6 +1,6 @@
 require "netrc"
 require 'fileutils'
-	
+
 module Harpoon
 	class Auth
 		class << self
@@ -34,7 +34,7 @@ module Harpoon
 		 		 # read netrc credentials if they exist
 		        if netrc
 		         @credentials = netrc["harpoon"] == nil ? ask_for_and_save_credentials : netrc["harpoon"]
-		        end   	
+		        end
 		    end
 
 		    def write_credentials(priv, pub)

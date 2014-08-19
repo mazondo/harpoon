@@ -1,3 +1,4 @@
+require 'fileutils'
 module Harpoon
 	class Client
 		attr_accessor :private_key, :public_key
@@ -6,6 +7,11 @@ module Harpoon
 			self.private_key = options[:private_key]
 			self.public_key = options[:public_key]
 			@hosting = options[:hosting]
+		end
+
+		def init
+			#initialize a config file in the current directory
+			FileUtils.copy_file File.join(__FILE__, "templates", "harpoon.json"), File.join(Dir.pwd, "harpoon.json")
 		end
 
 		def deploy(to, options = {})
