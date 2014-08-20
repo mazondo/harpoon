@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.email       = 'ryan@mazondo.com'
   s.files         = `git ls-files -z`.split("\x0")
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  s.add_dependency "thor",       "~> 0.18.1"
   s.add_dependency "netrc",       "~> 0.7.7"
   s.add_dependency "aws-sdk",     "~> 1.18.0"
   s.homepage    = 'http://www.github.com/mazondo/harpoon'
