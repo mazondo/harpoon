@@ -90,15 +90,6 @@ module Harpoon
       end
     end
 
-    def ask_for_and_save_credentials
-    	puts "Enter your Private Key:"
-    	private_key = $stdin.gets.to_s.strip
-    	puts "Enter your Public Key"
-    	public_key = $stdin.gets.to_s.strip
-    	write_credentials(private_key, public_key)
-    	return [private_key, public_key]
-    end
-
     def running_on_windows?
     		RUBY_PLATFORM =~ /mswin32|mingw32/
   	end
