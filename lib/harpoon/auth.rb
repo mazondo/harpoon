@@ -5,6 +5,7 @@ module Harpoon
 	class Auth
 		attr_reader :namespace
 		def initialize(options = {})
+			@logger = options[:logger]
 			if options[:namespace]
 				@namespace = sanitize_namespace(options[:namespace])
 			else

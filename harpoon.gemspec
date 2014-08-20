@@ -10,6 +10,6 @@ Gem::Specification.new do |s|
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.add_dependency "thor",       "~> 0.19.1"
   s.add_dependency "netrc",       "~> 0.7.7"
-  s.add_dependency "aws-sdk",     "~> 1.18.0"
+  s.add_dependency "aws-sdk",     "~> 1.51.0"
   s.homepage    = 'http://www.github.com/mazondo/harpoon'
 end

@@ -55,4 +55,9 @@ describe "Auth token" do
 		auth = Harpoon::Auth.new({namespace: "a.Z ?what NOW-2"})
 		assert_equal "aZwhatNOW-2", auth.namespace, "Should have cleaned up the name"
 	end
+
+	it "Should be able to be given a logger" do
+    auth = Harpoon::Auth.new({logger: Logger.new(STDOUT)})
+    assert_equal Logger, auth.instance_eval {@logger.class}, "Should have stored the logger"
+  end
 end

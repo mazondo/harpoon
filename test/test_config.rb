@@ -37,4 +37,13 @@ describe "Config File" do
   it "Should let me ask for the full path a config file" do
     assert_equal File.join(Dir.pwd, "test", "test_directory", "harpoon.json"), Harpoon::Config.full_path("test/test_directory"), "Should return the full file path of a config file"
   end
+
+  it "Should be able to be given a logger" do
+    config = Harpoon::Config.read("test/test_directory", Logger.new(STDOUT))
+    assert_equal Logger, config.instance_eval {@logger.class}, "Should have stored the logger"
+  end
+
+  it "Should expect and sanitize input" do
+    flunk "Not implemented"
+  end
 end

@@ -31,18 +31,19 @@ module Harpoon
 
     # Load a config file from a given path
     # Returns a new config object
-    def self.read(path = nil)
+    def self.read(path = nil, logger = nil)
       path = full_path(path)
       if File.exists? path
-        new JSON.parse(IO.read(path))
+        new JSON.parse(IO.read(path)), logger
       else
         raise Harpoon::Errors::InvalidConfigLocation, "Specified config doesn't exist, please create one"
       end
     end
 
     # Initialize a new config object with the data loaded
-    def initialize(data = {})
+    def initialize(data = {}, logger = nil)
       @config = data
+      @logger = logger
     end
 
     # Check for the configuration item

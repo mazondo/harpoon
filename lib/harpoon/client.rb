@@ -4,6 +4,7 @@ require "thor"
 module Harpoon
 	class Client < Thor
 		class_option :config, :type => :string
+		class_option :log_level, :type => :string
 
 		desc "init", "Initializes a config file in current directory"
 		def init

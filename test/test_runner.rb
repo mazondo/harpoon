@@ -25,4 +25,10 @@ describe "Runner" do
     @runner.deploy
     assert_equal :deploy, @runner.instance_eval {@service.requests[0][0]}, "Should have run deploy on the service"
   end
+
+  it "Should pass a default logger to everyone" do
+    assert_equal Logger, @runner.instance_eval {@service.instance_eval {@logger.class}}, "Should have passed a logger to the service"
+    assert_equal Logger, @runner.instance_eval {@auth.instance_eval {@logger.class}}, "Should have passed a logger to the auth"
+    assert_equal Logger, @runner.instance_eval {@config.instance_eval {@logger.class}}, "Should have passed a logger to the config"
+  end
 end
