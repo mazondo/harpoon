@@ -19,7 +19,26 @@ module Harpoon
 
 		desc "deploy", "Deploys the current app"
 		def deploy
-			puts "DePLOY! #{options[:config]}"
+			runner = Harpoon::Runner.new(options)
+			runner.deploy
+		end
+
+		desc "doctor", "Check the health of the current deploy strategy"
+		def doctor
+			runner = Harpoon::Runner.new(options)
+			runner.doctor
+		end
+
+		desc "list", "List available rollbacks"
+		def list
+			runner = Harpoon::Runner.new(options)
+			runner.list
+		end
+
+		desc "rollback", "Rollback to previous release"
+		def rollback
+			runner = Harpoon::Runner.new(options)
+			runner.rollback
 		end
 	end
 end

@@ -5,7 +5,11 @@ module Harpoon
 	class Auth
 		attr_reader :namespace
 		def initialize(options = {})
-			@namespace = options[:namespace] || "main"
+			if options[:namespace]
+				@namespace = sanitize_namespace(options[:namespace])
+			else
+				@namespace = "main"
+			end
 		end
 
 		def destroy(key)
@@ -97,5 +101,9 @@ module Harpoon
     def running_on_windows?
     		RUBY_PLATFORM =~ /mswin32|mingw32/
   	end
+
+		def sanitize_namespace(n)
+			n.gsub(/[^a-zA-Z0-9\-]/, "")
+		end
 	end
 end

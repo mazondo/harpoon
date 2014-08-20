@@ -50,4 +50,9 @@ describe "Auth token" do
 		assert_equal 1, auth.get("test-host")[0].to_i, "Should have stored it correctly"
 		assert_equal 2, auth.get("test-host")[1].to_i, "Should have stored it correctly"
 	end
+
+	it "Should know how to handle weird namespaces" do
+		auth = Harpoon::Auth.new({namespace: "a.Z ?what NOW-2"})
+		assert_equal "aZwhatNOW-2", auth.namespace, "Should have cleaned up the name"
+	end
 end

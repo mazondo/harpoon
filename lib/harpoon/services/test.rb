@@ -1,10 +1,11 @@
 module Harpoon
 	module Services
 		class Test
-			attr_accessor :options, :requests
+			attr_accessor :config, :requests
 
-			def initialize(options = {})
-				@options = options
+			def initialize(config = nil, auth = nil)
+				@auth = auth
+				@config = config
 				@requests = []
 			end
 

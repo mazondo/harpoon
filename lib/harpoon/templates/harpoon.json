@@ -1,8 +1,8 @@
 {
-  "app" : "appName",
+  "name" : "appName",
   "hosting" : "s3",
+  "auth_namespace" : "main",
   "hosting_options" : {
-    "account" : "main",
     "bucket_region" : "US Standard"
   },
   "domain" : {

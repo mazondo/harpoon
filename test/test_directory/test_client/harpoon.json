@@ -1,8 +1,9 @@
 {
-  "app" : "appName",
-  "hosting" : "testing",
+  "name" : "test-app",
+  "hosting" : "test",
+  "auth_namespace" : "test-namespace",
   "hosting_options" : {
-    "account" : "test-namespace"
+    "option" : "value"
   },
   "domain": {
     "primary" : "www.domain.com",
