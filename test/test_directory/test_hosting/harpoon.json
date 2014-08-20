@@ -1,0 +1,12 @@
+{
+  "app" : "appName",
+  "hosting" : "testing",
+  "hosting_options" : {
+    "account" : "test-namespace"
+  },
+  "domain": {
+    "primary" : "www.domain.com",
+    "forwarded" : ["domain.com"]
+  },
+  "directory" : ""
+}
