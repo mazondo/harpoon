@@ -26,7 +26,8 @@ describe "Config File" do
 
   it "Should know how to parse a config file" do
     config = Harpoon::Config.read("test/test_directory")
-    assert_equal "Ryan", config["name"], "Should have read the config file"
+    assert_equal "Ryan", config.name, "Should have read the config file"
+    assert_equal nil, config.other_value, "Should not have another value"
   end
 
   it "Should be able to tell me that a harpoon config exists" do

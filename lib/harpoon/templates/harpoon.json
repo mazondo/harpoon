@@ -1,9 +1,13 @@
 {
   "app" : "appName",
   "hosting" : "s3",
+  "hosting_options" : {
+    "account" : "main",
+    "bucket_region" : "US Standard"
+  },
   "domain" : {
     "primary" : "www.domain.com",
-    "forwarded" : "domain.com"
+    "forwarded" : ["domain.com"]
   },
   "directory" : ""
 }

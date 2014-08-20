@@ -1,9 +1,0 @@
-{
-  "app" : "appName",
-  "hosting" : "s3",
-  "domain" : {
-    "primary" : "www.domain.com",
-    "forwarded" : "domain.com"
-  },
-  "directory" : ""
-}

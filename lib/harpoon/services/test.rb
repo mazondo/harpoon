@@ -1,12 +1,11 @@
 module Harpoon
 	module Services
-		class TestHosting
+		class Test
 			attr_accessor :uploads, :dns_changes
 			attr_reader :auth
 			def initialize(options = {})
-				@auth = options[:auth]
-				self.uploads = []
-				self.dns_changes = []
+				@auth = auth
+				@options = options.config
 			end
 
 			def upload(location, files = [], options = {})
