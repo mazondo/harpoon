@@ -3,6 +3,7 @@ require "thor"
 
 module Harpoon
 	class Client < Thor
+		class_option :config, :type => :string
 
 		desc "init", "Initializes a config file in current directory"
 		def init
@@ -18,7 +19,7 @@ module Harpoon
 
 		desc "deploy", "Deploys the current app"
 		def deploy
-			
+			puts "DePLOY! #{options[:config]}"
 		end
 	end
 end
