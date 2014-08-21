@@ -11,5 +11,7 @@ Gem::Specification.new do |s|
   s.add_dependency "thor",       "~> 0.19.1"
   s.add_dependency "netrc",       "~> 0.7.7"
   s.add_dependency "aws-sdk",     "~> 1.51.0"
+  s.add_dependency "public_suffix", "~> 1.4.5"
+  s.add_dependency 'colorize', '~> 0.7.3'
   s.homepage    = 'http://www.github.com/mazondo/harpoon'
 end

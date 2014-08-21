@@ -34,16 +34,22 @@ module Harpoon
     def self.read(path = nil, logger = nil)
       path = full_path(path)
       if File.exists? path
-        new JSON.parse(IO.read(path)), logger
+        data = JSON.parse(IO.read(path))
+        directory = [File.dirname(path), data["directory"]].select {|m| m && m != ""}
+        data["directory"] = File.join(directory)
+        new data, logger
       else
         raise Harpoon::Errors::InvalidConfigLocation, "Specified config doesn't exist, please create one"
       end
     end
 
+    attr_reader :files
+
     # Initialize a new config object with the data loaded
     def initialize(data = {}, logger = nil)
       @config = data
       @logger = logger
+      @files = Dir.glob(File.join(@config["directory"], "**", "*")).select {|f| !File.directory?(f) && File.basename(f) != "harpoon.json"} if @config["directory"]
     end
 
     # Check for the configuration item

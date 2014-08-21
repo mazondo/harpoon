@@ -1,0 +1,12 @@
+{
+  "name" : "appName",
+  "hosting" : "s3",
+  "auth_namespace" : "main",
+  "hosting_options" : {
+    "region" : "US Standard"
+  },
+  "domain" : {
+    "primary" : "www.domain.com",
+    "forwarded" : ["domain.com"]
+  }
+}

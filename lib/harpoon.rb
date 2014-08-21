@@ -7,4 +7,5 @@ module Harpoon
 
 	# Services
 	require_relative "harpoon/services/test.rb"
+	require_relative "harpoon/services/s3.rb"
 end

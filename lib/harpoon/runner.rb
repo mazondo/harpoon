@@ -1,4 +1,5 @@
 require "logger"
+require "colorize"
 
 module Harpoon
   class Runner
@@ -36,8 +37,11 @@ module Harpoon
         end
       end
 
-      def load_logger(log_level = "warn")
+      def load_logger(log_level = "info")
+        log_level ||= "info"
         logger = Logger.new(STDOUT)
+
+        #set log level
         case log_level.downcase
         when "debug"
           logger.level = Logger::DEBUG
@@ -50,6 +54,25 @@ module Harpoon
         when "fatal"
           logger.level = Logger::FATAL
         end
+
+        #set log formatter
+        logger.formatter = proc do |severity, datetime, progname, msg|
+          case severity.to_s.downcase
+          when "debug"
+            "DEBUG: #{msg}\n".colorize(:light_blue)
+          when "info"
+            "#{msg}\n".colorize(:gray)
+          when "warn"
+            "#{msg}\n".colorize(:yellow)
+          when "error"
+            "#{msg}\n".colorize(:orange)
+          when "fatal"
+            "#{msg}\n".colorize(:red)
+          else
+            "#{severity} - #{msg}\n"
+          end
+        end
+
         logger
       end
   end

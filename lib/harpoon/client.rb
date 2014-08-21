@@ -18,6 +18,12 @@ module Harpoon
 			end
 		end
 
+		desc "setup", "Setup the current app"
+		def setup
+			runner = Harpoon::Runner.new(options)
+			runner.setup
+		end
+
 		desc "deploy", "Deploys the current app"
 		def deploy
 			runner = Harpoon::Runner.new(options)

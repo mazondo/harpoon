@@ -44,6 +44,17 @@ describe "Config File" do
   end
 
   it "Should expect and sanitize input" do
-    flunk "Not implemented"
+    skip "Not implemented"
+  end
+
+  it "Should provide a list of files for the services" do
+    nested = Harpoon::Config.read("test/test_directory/nested_files")
+    unnested = Harpoon::Config.read("test/test_directory/unnested_files")
+
+    assert_equal 1, nested.files.length, "Should have only found 1 file"
+    assert_equal File.join(Dir.pwd, "test", "test_directory", "nested_files", "nested", "directory", "test3.txt"), nested.files.first, "Should have found the correct file"
+
+    assert_equal 2, unnested.files.length, "Should have found 2 files"
+    assert_equal [File.join(Dir.pwd, "test", "test_directory", "unnested_files", "nested", "test2.txt"), File.join(Dir.pwd, "test", "test_directory", "unnested_files", "test.txt")], unnested.files, "Should have found the right files"
   end
 end
