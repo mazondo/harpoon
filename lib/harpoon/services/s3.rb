@@ -1,6 +1,7 @@
 require "aws-sdk"
 require "uri"
 require "public_suffix"
+require "pathname"
 
 module Harpoon
   module Services
@@ -37,8 +38,17 @@ module Harpoon
             @logger.info "Setting primary domain as website"
             bucket.configure_website
             #setup ACL
-            @logger.info "Setting ACL"
-            bucket.acl = :public_read
+            @logger.info "Setting bucket policy"
+            policy = AWS::S3::Policy.new
+            policy.allow(
+              actions: ['s3:GetObject'],
+              resources: [bucket.objects],
+              principals: :any
+            )
+
+            @logger.debug policy.to_json
+
+            bucket.policy = policy
 
 
             history = setup_bucket(rollback_bucket(@config.domain["primary"]))
@@ -68,22 +78,62 @@ module Harpoon
       end
 
       def deploy
-        
+        raise Harpoon::Errors::InvalidConfiguration, "Missing list of files" unless @config.files && @config.directory && @config.domain["primary"]
+        move_existing_to_history!
+        current_bucket = @s3.buckets[@config.domain["primary"]]
+        raise Harpoon::Errors::MissingSetup, "Required s3 buckets are not created, consider running harpoon setup first" unless current_bucket.exists?
+        @logger.info "Writing files to s3"
+        @config.files.each do |f|
+          @logger.debug "Path: #{f}"
+          relative_path = Pathname.new(f).relative_path_from(Pathname.new(@config.directory)).to_s
+          @logger.debug "s3 key: #{relative_path}"
+          current_bucket.objects[relative_path].write(Pathname.new(f))
+        end
+        @logger.info "Deploy complete"
       end
 
       def list
         @logger.info "The following rollbacks are available:"
-        if @config.domains && @config.domains["primary"]
-          @logger.info @s3.buckets[rollback_bucket(@config.domains["primary"])].as_tree
+        if @config.domain && @config.domain["primary"]
+          tree = @s3.buckets[rollback_bucket(@config.domain["primary"])].as_tree
+          rollbacks = tree.children.collect {|i| i.prefix.gsub(/\/$/, "").to_i }
+          rollbacks.sort!.reverse!
+          rollbacks.each_with_index do |r, index|
+            @logger.info Time.at(r).strftime("#{index + 1} - %F %r")
+          end
         end
       end
 
       def doctor
-
+        # check configuration
+        if @config.domain
+          if @config.domain["primary"]
+            @logger.info "Primary Domain: #{@config.domain["primary"]}"
+          else
+            @logger.fatal "Missing Primary Domain"
+            exit
+          end
+        else
+          @logger.fatal "Missing Domain Configuration"
+          exit
+        end
+        # check IAM permissions
+        # check buckets exist
+        primary_bucket = @s3.buckets[@config.domain["primary"]]
+        if primary_bucket.exists?
+          @logger.info "Primary bucket exists"
+        else
+          @logger.fatal "Missing Primary domain bucket"
+        end
+        # check domain setup
+        # print DNS settings
+        print_dns_settings(@config.domain["primary"])
       end
 
       def rollback
-
+        @logger.info "Not yet implemented!"
+        @logger.info "But don't worry, your rollbacks are safely stored in #{rollback_bucket(@config.domain["primary"])}"
+        self.list
       end
 
       private
@@ -167,6 +217,28 @@ module Harpoon
 
       def rollback_bucket(domain)
         "#{domain}-history"
+      end
+
+      def move_existing_to_history!
+        raise Harpoon::Errors::InvalidConfiguration, "Must have a primary domain defined" unless @config.domain["primary"]
+        @logger.info "Moving existing deploy to history"
+        current = @s3.buckets[@config.domain["primary"]]
+        history = @s3.buckets[rollback_bucket(@config.domain["primary"])]
+        raise Harpoon::Errors::MissingSetup, "The expected buckets are not yet created, please try running harpoon setup" unless current.exists? && history.exists?
+
+        current_date = Time.now.to_i
+        #iterate over current bucket objects and prefix them with timestamp, move to history bucket
+        current.objects.each do |o|
+          s3_key = File.join(current_date.to_s, o.key)
+          @logger.debug "Original Key: #{o.key}"
+          @logger.debug "History Key: #{s3_key}"
+          @logger.debug "Metadata: #{o.metadata.to_h.inspect}"
+          history.objects[s3_key].write(o.read, {metadata: o.metadata})
+        end
+        @logger.debug "Moved to history, deleting files from current bucket"
+        #delete the current objects
+        current.objects.delete_all
+        @logger.debug "Files deleted"
       end
     end
   end
