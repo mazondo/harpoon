@@ -1,4 +1,6 @@
 # Harpoon
-A static site deployer
+A static site deployer, initially targeting Amazon s3
 
-This is a work in progress, not ready for prime time just yet.  Keep your eyes on it though, I'll be releasing it shortly!
+This project is a work in progress, but it's already pretty functional and serves my purposes well.  Feedback/issues/encouragement/complaints are all awesome and appreciated!
+
+Learn more at [www.getharpoon.com](http://www.getharpoon.com).

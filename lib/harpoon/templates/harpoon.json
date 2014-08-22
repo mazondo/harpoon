@@ -3,7 +3,7 @@
   "hosting" : "s3",
   "auth_namespace" : "main",
   "hosting_options" : {
-    "region" : "US Standard"
+    "region" : "us-west-2"
   },
   "domain" : {
     "primary" : "www.domain.com",
