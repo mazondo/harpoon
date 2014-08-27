@@ -41,6 +41,8 @@ module Harpoon
       @options = self.class.default_options.dup
 
       @options.deep_merge!(config.hosting_options || {})
+      #copy over the directory as well
+      @options.directory = config.directory
 
       @options.validate!
 

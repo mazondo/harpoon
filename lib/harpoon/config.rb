@@ -44,14 +44,15 @@ module Harpoon
       end
     end
 
-    attr_reader :files
-
     # Initialize a new config object with the data loaded
     def initialize(data = {}, logger = nil)
       @data = data.symbolize_keys
       @logger = logger
       @required_values = []
-      @files = Dir.glob(File.join(@data[:directory], "**", "*")).select {|f| !File.directory?(f) && File.basename(f) != "harpoon.json"} if @data[:directory]
+    end
+
+    def files
+      Dir.glob(File.join(@data[:directory], "**", "*")).select {|f| !File.directory?(f) && File.basename(f) != "harpoon.json"} if @data[:directory]
     end
 
     def deep_merge!(h1)
