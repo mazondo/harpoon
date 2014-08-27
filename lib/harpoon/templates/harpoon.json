@@ -3,11 +3,9 @@
   "hosting" : "s3",
   "auth_namespace" : "main",
   "hosting_options" : {
+    "primary_domain": "www.domain.com",
+    "forwarded_domain" : ["domain.com"],
     "region" : "us-west-2"
-  },
-  "domain" : {
-    "primary" : "www.domain.com",
-    "forwarded" : ["domain.com"]
   },
   "directory" : ""
 }

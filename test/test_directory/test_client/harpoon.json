@@ -3,11 +3,9 @@
   "hosting" : "test",
   "auth_namespace" : "test-namespace",
   "hosting_options" : {
-    "option" : "value"
-  },
-  "domain": {
-    "primary" : "www.domain.com",
-    "forwarded" : ["domain.com"]
+    "option" : "value",
+    "primary_domain" : "www.domain.com",
+    "forwarded_domain" : ["domain.com"]
   },
   "directory" : ""
 }

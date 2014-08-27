@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'harpoon'
-  s.version     = '0.0.3'
+  s.version     = '0.0.4'
   s.date        = '2014-08-20'
   s.summary     = "A single page app deployer for amazon s3"
   s.description = "Deploy small server-less webapps to amazon s3, including buckets, dns and permissions"

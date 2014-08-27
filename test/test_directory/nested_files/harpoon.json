@@ -3,11 +3,9 @@
   "hosting" : "s3",
   "auth_namespace" : "main",
   "hosting_options" : {
-    "region" : "US Standard"
-  },
-  "domain" : {
-    "primary" : "www.domain.com",
-    "forwarded" : ["domain.com"]
+    "region" : "US Standard",
+    "primary_domain" : "www.domain.com",
+    "forwarded_domain" : ["domain.com"]
   },
   "directory" : "nested/directory"
 }
