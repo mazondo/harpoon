@@ -4,6 +4,7 @@ module Harpoon
 	require_relative "harpoon/errors"
 	require_relative "harpoon/config"
 	require_relative "harpoon/runner"
+	require_relative "harpoon/logger"
 
 	# Services
 	require_relative "harpoon/service"
