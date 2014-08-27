@@ -14,5 +14,6 @@ Gem::Specification.new do |s|
   s.add_dependency "aws-sdk",     "~> 1.51.0"
   s.add_dependency "public_suffix", "~> 1.4.5"
   s.add_dependency 'colorize', '~> 0.7.3'
+  s.add_dependency 'activesupport', "~> 4.1.5"
   s.homepage    = 'http://www.getharpoon.com'
 end

@@ -2,7 +2,7 @@ require "helper"
 
 describe "Test Hosting Module" do
 	before do
-		@hosting = Harpoon::Services::Test.new
+		@hosting = Harpoon::Services::Test.new(Object.new, Object.new, Object.new)
 	end
 
 	it "Should let me make requests" do
@@ -10,5 +10,5 @@ describe "Test Hosting Module" do
 		assert_equal :deploy, @hosting.requests[0][0]
 		assert_equal ["options", "go", "here"], @hosting.requests[0][1]
 	end
-	
+
 end

@@ -16,11 +16,6 @@ describe "Runner" do
     assert_equal "test-namespace", @runner.instance_eval {@auth.namespace}, "Should have set the namespace correctly"
   end
 
-  it "Should be passing in the configuration and auth to the service" do
-    assert_equal @runner.instance_eval {@auth}, @runner.instance_eval {@service.instance_eval {@auth}}, "Should have gotten the right auth"
-    assert_equal @runner.instance_eval {@config}, @runner.instance_eval {@service.instance_eval {@config}}, "Should have gotten the right config"
-  end
-
   it "Should pass any unknown commands to the service" do
     @runner.deploy
     assert_equal :deploy, @runner.instance_eval {@service.requests[0][0]}, "Should have run deploy on the service"

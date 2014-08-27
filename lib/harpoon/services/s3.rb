@@ -6,81 +6,85 @@ require "pathname"
 module Harpoon
   module Services
     class S3
-      def initialize(config, auth, logger)
-        # Store what we're given for later
-        @config = config
-        @auth = auth
-        @logger = logger
+      include Harpoon::Service
 
-        # Ask for the users credentials
-        @credentials = @auth.get_or_ask("s3", "Key", "Secret")
+      # def initialize(config, auth, logger)
+      #   # Store what we're given for later
+      #   @config = config
+      #   @auth = auth
+      #   @logger = logger
+      #
+      #   # Ask for the users credentials
+      #   @credentials = @auth.get_or_ask("s3", "Key", "Secret")
+      #
+      #   if config.hosting_options && config.hosting_options["region"]
+      #     region = config.hosting_options["region"]
+      #   else
+      #     region = "us-west-2"
+      #   end
+      #
+      #   AWS.config(access_key_id: @credentials[0], secret_access_key: @credentials[1], region: region)
+      #
+      #   # setup amazon interfaces
+      #   s3 = AWS::S3.new
+      #   r53 = AWS::Route53.new
+      # end
 
-        if config.hosting_options && config.hosting_options["region"]
-          region = config.hosting_options["region"]
-        else
-          region = "us-west-2"
-        end
+      auth :key, "Key"
+      auth :secret, "Secret"
 
-        AWS.config(access_key_id: @credentials[0], secret_access_key: @credentials[1], region: region)
-
-        # setup amazon interfaces
-        @s3 = AWS::S3.new
-        @r53 = AWS::Route53.new
-      end
+      option :region, default: "us-west-2"
 
       def setup
-        if @config.domain
-          #we have domain info, so let's make sure it's setup for it
-          if @config.domain["primary"]
-            #primary domain detected, let's make sure it exists
-            bucket = setup_bucket(@config.domain["primary"])
-            #setup bucket to server webpages
-            @logger.info "Setting primary domain as website"
-            bucket.configure_website
-            #setup ACL
-            @logger.info "Setting bucket policy"
-            policy = AWS::S3::Policy.new
-            policy.allow(
-              actions: ['s3:GetObject'],
-              resources: [bucket.objects],
-              principals: :any
-            )
+        if @options["primary_domain"]
+          #primary domain detected, let's make sure it exists
+          bucket = setup_bucket(@config.domain["primary"])
+          #setup bucket to server webpages
+          @logger.info "Setting primary domain as website"
+          bucket.configure_website
+          #setup ACL
+          @logger.info "Setting bucket policy"
+          policy = AWS::S3::Policy.new
+          policy.allow(
+            actions: ['s3:GetObject'],
+            resources: [bucket.objects],
+            principals: :any
+          )
 
-            @logger.debug policy.to_json
+          @logger.debug policy.to_json
 
-            bucket.policy = policy
+          bucket.policy = policy
 
 
-            history = setup_bucket(rollback_bucket(@config.domain["primary"]))
-            @logger.info "Created rollback bucket"
+          history = setup_bucket(rollback_bucket(@config.domain["primary"]))
+          @logger.info "Created rollback bucket"
 
-            setup_dns_alias(@config.domain["primary"], bucket)
+          setup_dns_alias(@config.domain["primary"], bucket)
 
 
-            if @config.domain["forwarded"]
-              #we also want to forward some domains
-              #make sure we have an array
-              #TODO : Move all of this nonsense to the config object, it should be validating this stuff
-              forwarded = @config.domain["forwarded"].is_a?(Array) ? @config.domain["forwarded"] : [@config.domain["forwarded"]]
-              forwarded.each do |f|
-                bucket = setup_bucket(f)
-                @logger.info "Seting up redirect to primary"
-                cw = AWS::S3::WebsiteConfiguration.new({redirect_all_requests_to: {host_name: @config.domain["primary"]}})
-                bucket.website_configuration = cw
-                setup_dns_alias(f, bucket)
-              end
+          if @options["forwarded_domain"]
+            #we also want to forward some domains
+            #make sure we have an array
+            #TODO : Move all of this nonsense to the config object, it should be validating this stuff
+            forwarded = @config.domain["forwarded"].is_a?(Array) ? @config.domain["forwarded"] : [@config.domain["forwarded"]]
+            forwarded.each do |f|
+              bucket = setup_bucket(f)
+              @logger.info "Seting up redirect to primary"
+              cw = AWS::S3::WebsiteConfiguration.new({redirect_all_requests_to: {host_name: @config.domain["primary"]}})
+              bucket.website_configuration = cw
+              setup_dns_alias(f, bucket)
             end
-
-            # print out DNS settings
-            print_dns_settings(@config.domain["primary"])
           end
+
+          # print out DNS settings
+          print_dns_settings(@config.domain["primary"])
         end
       end
 
       def deploy
         raise Harpoon::Errors::InvalidConfiguration, "Missing list of files" unless @config.files && @config.directory && @config.domain["primary"]
         move_existing_to_history!
-        current_bucket = @s3.buckets[@config.domain["primary"]]
+        current_bucket = s3.buckets[@config.domain["primary"]]
         raise Harpoon::Errors::MissingSetup, "Required s3 buckets are not created, consider running harpoon setup first" unless current_bucket.exists?
         @logger.info "Writing files to s3"
         @config.files.each do |f|
@@ -95,7 +99,7 @@ module Harpoon
       def list
         @logger.info "The following rollbacks are available:"
         if @config.domain && @config.domain["primary"]
-          tree = @s3.buckets[rollback_bucket(@config.domain["primary"])].as_tree
+          tree = s3.buckets[rollback_bucket(@config.domain["primary"])].as_tree
           rollbacks = tree.children.collect {|i| i.prefix.gsub(/\/$/, "").to_i }
           rollbacks.sort!.reverse!
           rollbacks.each_with_index do |r, index|
@@ -119,7 +123,7 @@ module Harpoon
         end
         # check IAM permissions
         # check buckets exist
-        primary_bucket = @s3.buckets[@config.domain["primary"]]
+        primary_bucket = s3.buckets[@config.domain["primary"]]
         if primary_bucket.exists?
           @logger.info "Primary bucket exists"
         else
@@ -138,6 +142,14 @@ module Harpoon
 
       private
 
+      def s3
+        @s3 ||= AWS::S3.new({access_key_id: @auth[:key], secret_access_key: @auth[:secret], region: @options[:region]})
+      end
+
+      def r53
+        @r53 ||= AWS::Route53.new({access_key_id: @auth[:key], secret_access_key: @auth[:secret], region: @options[:region]})
+      end
+
       def setup_dns_alias(domain, bucket)
         @logger.debug "Setup Domain Alias for #{domain}"
         #extract root domain
@@ -151,8 +163,8 @@ module Harpoon
 
 
         #ensure we have a hosted zone
-        hosted_zone = @r53.hosted_zones.find {|h| h.name == rdomain}
-        hosted_zone = @r53.hosted_zones.create(rdomain, {comment: "Created By Harpoon"}) if !hosted_zone
+        hosted_zone = r53.hosted_zones.find {|h| h.name == rdomain}
+        hosted_zone = r53.hosted_zones.create(rdomain, {comment: "Created By Harpoon"}) if !hosted_zone
 
         record = hosted_zone.rrsets[domain, "A"]
 
@@ -165,9 +177,9 @@ module Harpoon
 
       def setup_bucket(bucket_name)
         @logger.info "Creating bucket: #{bucket_name}"
-        bucket = @s3.buckets[bucket_name]
+        bucket = s3.buckets[bucket_name]
         unless bucket.exists?
-          bucket = @s3.buckets.create(bucket_name)
+          bucket = s3.buckets.create(bucket_name)
         end
         bucket
       end
@@ -208,7 +220,7 @@ module Harpoon
         @logger.debug "Root Domain: #{rdomain}"
         @logger.warn "=============================="
         @logger.warn "Please forward to the following DNS:"
-        hosted_zone = @r53.hosted_zones.find {|h| h.name == rdomain}
+        hosted_zone = r53.hosted_zones.find {|h| h.name == rdomain}
         hosted_zone.rrsets[rdomain, "NS"].resource_records.each do |r|
           @logger.warn r[:value]
         end
@@ -222,8 +234,8 @@ module Harpoon
       def move_existing_to_history!
         raise Harpoon::Errors::InvalidConfiguration, "Must have a primary domain defined" unless @config.domain["primary"]
         @logger.info "Moving existing deploy to history"
-        current = @s3.buckets[@config.domain["primary"]]
-        history = @s3.buckets[rollback_bucket(@config.domain["primary"])]
+        current = s3.buckets[@config.domain["primary"]]
+        history = s3.buckets[rollback_bucket(@config.domain["primary"])]
         raise Harpoon::Errors::MissingSetup, "The expected buckets are not yet created, please try running harpoon setup" unless current.exists? && history.exists?
 
         current_date = Time.now.to_i

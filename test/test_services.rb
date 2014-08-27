@@ -7,6 +7,7 @@ describe "Test all services" do
 		# functions
 		Harpoon::Services.constants.each do |c|
 			next if c.to_s == "Test" #skip the test
+			next if c.to_s == "TestBase" #skip base test
 			m = Kernel.const_get("Harpoon").const_get("Services").const_get(c).instance_methods
 			assert_includes m, :deploy, "Should include a deploy method"
 			assert_includes m, :doctor, "Should include a doctor method"

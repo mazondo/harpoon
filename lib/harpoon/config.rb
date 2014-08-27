@@ -1,5 +1,6 @@
 require "json"
 require "fileutils"
+require "active_support/core_ext/hash"
 
 module Harpoon
   class Config
@@ -47,14 +48,55 @@ module Harpoon
 
     # Initialize a new config object with the data loaded
     def initialize(data = {}, logger = nil)
-      @config = data
+      @data = data.symbolize_keys
       @logger = logger
-      @files = Dir.glob(File.join(@config["directory"], "**", "*")).select {|f| !File.directory?(f) && File.basename(f) != "harpoon.json"} if @config["directory"]
+      @required_values = []
+      @files = Dir.glob(File.join(@data[:directory], "**", "*")).select {|f| !File.directory?(f) && File.basename(f) != "harpoon.json"} if @data[:directory]
+    end
+
+    def deep_merge!(h1)
+      @data.deep_merge! h1.symbolize_keys
+    end
+
+    def requires(required_value)
+      @required_values.push(required_value.to_sym)
+    end
+
+    def validate!
+      @required_values.each do |r|
+        raise Harpoon::Errors::InvalidConfiguration, "Missing #{r} configuration" if @data[r] == nil
+      end
+    end
+
+    def validate
+      begin
+        validate!
+      rescue Harpoon::Errors::InvalidConfiguration
+        return false
+      else
+        return true
+      end
+    end
+
+    def data
+      @data.dup
+    end
+
+    def dup
+      c = Harpoon::Config.new(self.data)
+      req = @required_values.dup
+      c.instance_eval {@required_values = req}
+      c
     end
 
     # Check for the configuration item
     def method_missing(method, *args)
-      @config[method.to_s]
+      method = method.to_s
+      if method.end_with? "="
+        @data[method.gsub(/=$/, "").to_sym] = args.first
+      else
+        @data[method.to_sym]
+      end
     end
   end
 end

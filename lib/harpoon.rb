@@ -6,6 +6,7 @@ module Harpoon
 	require_relative "harpoon/runner"
 
 	# Services
-	require_relative "harpoon/services/test.rb"
-	require_relative "harpoon/services/s3.rb"
+	require_relative "harpoon/service"
+	require_relative "harpoon/services/test"
+	require_relative "harpoon/services/s3"
 end
