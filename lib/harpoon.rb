@@ -10,4 +10,5 @@ module Harpoon
 	require_relative "harpoon/service"
 	require_relative "harpoon/services/test"
 	require_relative "harpoon/services/s3"
+	require_relative "harpoon/services/bitballoon"
 end

@@ -34,7 +34,7 @@ module Harpoon
           bucket.policy = policy
 
 
-          history = setup_bucket(rollback_bucket(@options.primary_domain))
+          history = setup_bucket(rollback_bucket_name(@options.primary_domain))
           @logger.info "Created rollback bucket"
 
           setup_dns_alias(@options.primary_domain, bucket)
@@ -43,7 +43,6 @@ module Harpoon
           if @options.forwarded_domain
             #we also want to forward some domains
             #make sure we have an array
-            #TODO : Move all of this nonsense to the config object, it should be validating this stuff
             forwarded = @options.forwarded_domain.is_a?(Array) ? @options.forwarded_domain : [@options.forwarded_domain]
             forwarded.each do |f|
               bucket = setup_bucket(f)
@@ -61,28 +60,33 @@ module Harpoon
 
       def deploy
         raise Harpoon::Errors::InvalidConfiguration, "Missing list of files" unless @options.files && @options.directory && @options.primary_domain
-        move_existing_to_history!
-        current_bucket = s3.buckets[@options.primary_domain]
-        raise Harpoon::Errors::MissingSetup, "Required s3 buckets are not created.  Run harpoon doctor to test." unless current_bucket.exists?
-        @logger.info "Copying new release to s3"
-        @options.files.each do |f|
-          @logger.debug "Path: #{f}"
-          relative_path = Pathname.new(f).relative_path_from(Pathname.new(@options.directory)).to_s
-          @logger.debug "s3 key: #{relative_path}"
-          current_bucket.objects[relative_path].write(Pathname.new(f))
+        if primary_bucket
+          move_existing_to_history!
+          @logger.info "Copying new release to s3"
+          @options.files.each do |f|
+            @logger.debug "Path: #{f}"
+            relative_path = Pathname.new(f).relative_path_from(Pathname.new(@options.directory)).to_s
+            @logger.debug "s3 key: #{relative_path}"
+            primary_bucket.objects[relative_path].write(Pathname.new(f))
+          end
+          @logger.info "...done"
+        else
+          raise Harpoon::Errors::MissingSetup, "Required s3 buckets are not created.  Run harpoon doctor to test."
         end
-        @logger.info "...done"
       end
 
       def list
         @logger.info "The following rollbacks are available:"
-        if @options.primary_domain
-          tree = s3.buckets[rollback_bucket(@options.primary_domain)].as_tree
+        if rollback_bucket
+          tree = rollback_bucket.as_tree
           rollbacks = tree.children.collect {|i| i.prefix.gsub(/\/$/, "").to_i }
           rollbacks.sort!.reverse!
           rollbacks.each_with_index do |r, index|
             @logger.info Time.at(r).strftime("#{index + 1} - %F %r")
           end
+        else
+          @logger.warn "Rollback bucket not yet created"
+          @logger.suggest "Run harpoon setup to create one"
         end
       end
 
@@ -142,10 +146,15 @@ module Harpoon
         @logger.info "...done"
       end
 
-      def rollback
+      def rollback(version)
         @logger.info "Not yet implemented!"
         @logger.info "Your rollbacks ARE safe on s3 #{rollback_bucket(@options.primary_domain)}"
-        self.list
+        if rollback_bucket && primary_bucket
+          @logger.debug "Rollback bucket found, ensuring version exists"
+        else
+          @logger.warn "Buckets not yet configured"
+          @logger.suggest "Setup a primary domain in your configuration and run harpoon setup"
+        end
       end
 
       private
@@ -235,10 +244,6 @@ module Harpoon
         @logger.suggest "=============================="
       end
 
-      def rollback_bucket(domain)
-        "#{domain}-history"
-      end
-
       def move_existing_to_history!
         raise Harpoon::Errors::InvalidConfiguration, "Must have a primary domain defined" unless @options.primary_domain
         @logger.info "Moving existing deploy to history"
@@ -257,8 +262,30 @@ module Harpoon
         end
         @logger.debug "Moved to history, deleting files from current bucket"
         #delete the current objects
-        current.objects.delete_all
+        bucket.objects.delete_all
         @logger.debug "Files deleted"
+      end
+
+      def primary_bucket
+        return @primary_bucket if defined? @primary_bucket
+        if @options.primary_domain && s3.buckets[@options.primary_domain].exists?
+          return @primary_bucket = s3.buckets[@options.primary_domain]
+        else
+          return false
+        end
+      end
+
+      def rollback_bucket
+        return @rollback_bucket if defined? @rollback_bucket
+        if @options.primary_domain && s3.buckets[rollback_bucket_name(@options.primary_domain)].exists?
+          return @rollback_bucket = s3.buckets[rollback_bucket_name(@options.primary_domain)]
+        else
+          return false
+        end
+      end
+
+      def rollback_bucket_name(domain)
+        "#{domain}-history"
       end
     end
   end
