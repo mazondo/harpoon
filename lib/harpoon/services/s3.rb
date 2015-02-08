@@ -248,7 +248,7 @@ module Harpoon
         raise Harpoon::Errors::InvalidConfiguration, "Must have a primary domain defined" unless @options.primary_domain
         @logger.info "Moving existing deploy to history"
         current = s3.buckets[@options.primary_domain]
-        history = s3.buckets[rollback_bucket(@options.primary_domain)]
+        history = s3.buckets[rollback_bucket_name(@options.primary_domain)]
         raise Harpoon::Errors::MissingSetup, "The expected buckets are not yet created, please try running harpoon setup" unless current.exists? && history.exists?
 
         current_date = Time.now.to_i
@@ -262,7 +262,7 @@ module Harpoon
         end
         @logger.debug "Moved to history, deleting files from current bucket"
         #delete the current objects
-        bucket.objects.delete_all
+        current.objects.delete_all
         @logger.debug "Files deleted"
       end
 

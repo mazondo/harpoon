@@ -70,8 +70,8 @@ module Harpoon
           exit
         end
 
-        if @config[:primary_domain]
-          if site.custom_domain == @config[:primary_domain]
+        if @options.primary_domain
+          if site.custom_domain == @options.primary_domain
             @logger.pass "Custom domain configured"
           else
             @logger.fail "Custom domain not setup"
