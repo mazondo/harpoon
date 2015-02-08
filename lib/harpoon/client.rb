@@ -42,10 +42,10 @@ module Harpoon
 			runner.list
 		end
 
-		desc "rollback", "Rollback to previous release"
-		def rollback
+		desc "rollback VERSION", "Rollback to previous release"
+		def rollback(version)
 			runner = Harpoon::Runner.new(options)
-			runner.rollback
+			runner.rollback(version)
 		end
 	end
 end

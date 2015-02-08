@@ -27,6 +27,7 @@ describe "Service Base" do
     @mock_auth = MiniTest::Mock.new
     @mock_logger = MiniTest::Mock.new
     d = {
+      name: "test-app",
       hosting: :test,
       hosting_options: {default_option: "one", new_option: true, default_option_required: true}
     }
@@ -47,6 +48,11 @@ describe "Service Base" do
     assert_equal "one", @service.instance_eval {@options.default_option}
     assert_equal true, @service.instance_eval {@options.default_option_2}
     assert_equal true, @service.instance_eval {@options.new_option}
+  end
+
+  it "Should give us access to the root config object" do
+    @service = Harpoon::Services::TestBase.new(@mock_options, @mock_auth, @mock_logger)
+    assert_equal "test-app", @service.instance_eval {@config.name}
   end
 
   it "Should raise an error if required options aren't included" do

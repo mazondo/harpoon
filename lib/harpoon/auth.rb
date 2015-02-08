@@ -37,13 +37,19 @@ module Harpoon
 			end
 		end
 
-		def get_or_ask(key, mes1 = "Private Key", mes2 = "Public Key")
+		def get_or_ask(key, mes1 = nil, mes2 = nil)
 			values = get(key)
 			return values if values
-			puts "Enter your #{mes1}:"
-			val1 = $stdin.gets.to_s.strip
-			puts "Enter your #{mes2}:"
-			val2 = $stdin.gets.to_s.strip
+			val1 = nil
+			val2 = nil
+			if mes1
+				puts "Enter your #{mes1}:"
+				val1 = $stdin.gets.to_s.strip
+			end
+			if mes2
+				puts "Enter your #{mes2}:"
+				val2 = $stdin.gets.to_s.strip
+			end
 			set(key, val1, val2)
 			return [val1, val2]
 		end
@@ -52,7 +58,7 @@ module Harpoon
 
 		#netrc doesn't like nil values
 		def netrc_nil(value = nil)
-			if value
+			if value && value != ""
 				if value == "nothing-here"
 					return nil
 				else

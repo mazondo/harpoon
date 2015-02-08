@@ -38,6 +38,7 @@ module Harpoon
     def initialize(config, auth, logger)
       @logger = logger
       @auth = {}
+      @config = config
       @options = self.class.default_options.dup
 
       @options.deep_merge!(config.hosting_options || {})
