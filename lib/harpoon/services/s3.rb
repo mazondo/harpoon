@@ -2,6 +2,7 @@ require "aws-sdk"
 require "uri"
 require "public_suffix"
 require "pathname"
+require "mimemagic"
 
 module Harpoon
   module Services
@@ -66,8 +67,9 @@ module Harpoon
           @options.files.each do |f|
             @logger.debug "Path: #{f}"
             relative_path = Pathname.new(f).relative_path_from(Pathname.new(@options.directory)).to_s
+            content_type = MimeMagic.by_path(relative_path)
             @logger.debug "s3 key: #{relative_path}"
-            primary_bucket.objects[relative_path].write(Pathname.new(f))
+            primary_bucket.objects[relative_path].write(Pathname.new(f), content_type: content_type)
           end
           @logger.info "...done"
         else
