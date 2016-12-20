@@ -16,5 +16,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'public_suffix', '~> 1.4', '>= 1.4.5'
   s.add_runtime_dependency 'colorize', '~> 0.7', '>= 0.7.3'
   s.add_runtime_dependency 'activesupport', '~> 4.1', '>= 4.1.5'
+  s.add_runtime_dependency 'mimemagic', '~> 0.3.2'
   s.homepage    = 'http://www.getharpoon.com'
 end
